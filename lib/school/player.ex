@@ -11,5 +11,7 @@ defmodule School.Player do
             pid: nil,
             ready?: false,
             ezic_contract: false,
-            custom_rules: []
+            ezic_score: 0,
+            custom_rules: [],
+            was_coerced: false
 end

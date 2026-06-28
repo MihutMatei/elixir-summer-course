@@ -15,6 +15,14 @@ defmodule School.Logic do
   }
 
   def generate_package do
+    if :rand.uniform(100) > 70 do
+      generate_ezic_package()
+    else
+      generate_real_package()
+    end
+  end
+
+  def generate_real_package do
     type = Enum.random([:letter, :parcel, :fragile])
     weight = calculate_weight(type)
     destination = Enum.random([:domestic, :eu, :international])
@@ -36,7 +44,11 @@ defmodule School.Logic do
     }
   end
 
-  def validate(package, rules_to_apply) do
+  def generate_ezic_package do
+    %Package{is_ezic: true}
+  end
+
+  def validate(package, rules_to_apply) when not package.is_ezic do
     [
       rule1: &validate_rule1/1,
       rule2: &validate_rule2/1,
@@ -56,6 +68,10 @@ defmodule School.Logic do
         {:invalid, msg} -> {:halt, {:invalid, msg}}
       end
     end)
+  end
+
+  def validate(package, _rules_to_apply) when package.is_ezic do
+    {:valid, "ezic"}
   end
 
   @type rule ::
