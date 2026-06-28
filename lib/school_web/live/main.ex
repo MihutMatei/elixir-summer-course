@@ -174,7 +174,7 @@ defmodule SchoolWeb.MainLive do
     package = socket.assigns.package
 
     {updated_player, decision, validation_msg} =
-      State.update_player_score(self(), package, expected)
+      State.update_player_score(self(), package, expected, swipe_direction)
 
     new_socket =
       socket
@@ -188,6 +188,7 @@ defmodule SchoolWeb.MainLive do
 
     new_socket
   end
+
 
   def build_game_time_loading_bar(game_time) do
     max_game_time = State.max_game_time()

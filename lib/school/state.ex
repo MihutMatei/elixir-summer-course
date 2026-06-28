@@ -48,8 +48,12 @@ defmodule School.State do
     GenServer.call(__MODULE__, :get_active_rules)
   end
 
-  def update_player_score(pid, package, expected) do
-    GenServer.call(__MODULE__, {:update_player_score, pid, package, expected})
+  def update_player_score(pid, package, expected, swipe_direction) do
+    GenServer.call(__MODULE__, {:update_player_score, pid, package, expected, swipe_direction})
+  end
+
+  def add_custom_rule(pid, rule) do
+    GenServer.call(__MODULE__, {:add_custom_rule, pid, rule})
   end
 
   @impl true
@@ -81,12 +85,13 @@ defmodule School.State do
   end
 
   @impl true
-  def handle_call({:update_player_score, pid, package, expected}, _from, state) do
+  def handle_call({:update_player_score, pid, package, expected, swipe_direction}, _from, state) do
     {[player], remaining_players} =
       Enum.split_with(state.players, fn player -> player.pid == pid end)
 
     {validation_result, validation_msg} =
       Logic.validate(package, state.active_rules ++ player.custom_rules)
+
 
     decision =
       if validation_result == expected,
@@ -98,9 +103,25 @@ defmodule School.State do
         do: 1,
         else: -1
 
-    new_score = max(player.score + score_delta, 0)
+    new_score = if !package.is_ezic, do: max(player.score + score_delta, 0), else: player.score
+    new_ezic_score = if package.is_ezic do
+      if swipe_direction == "swipe-right", do: player.ezic_score + 1, else: player.ezic_score - 1
+    else
+      if player.was_coerced do
+        if swipe_direction == "swipe-right", do: player.ezic_score + 1, else: player.ezic_score - 2
+      else
+        player.ezic_score
+      end
+    end
+
+    coercion = package.is_ezic and swipe_direction == "swipe-right"
+
+    ezic_contract = if package.is_ezic and not player.ezic_contract, do: true, else: player.ezic_contract
 
     updated_player = Map.put(player, :score, new_score)
+    updated_player = Map.put(updated_player, :ezic_score, new_ezic_score)
+    updated_player = Map.put(updated_player, :was_coerced, coercion)
+    updated_player = Map.put(updated_player, :ezic_contract, ezic_contract)
 
     updated_player_list = [updated_player | remaining_players]
 
@@ -113,6 +134,17 @@ defmodule School.State do
     new_state = Map.put(state, :players, updated_player_list)
 
     {:reply, {updated_player, decision, validation_msg}, new_state}
+  end
+
+  @impl true
+  def handle_call({:add_custom_rule, pid, rule}, _from, state) do
+    {[player], remaining_players} =
+      Enum.split_with(state.players, fn p -> p.pid == pid end)
+
+    updated_player = Map.update!(player, :custom_rules, fn rules -> [rule | rules] end)
+    new_state = Map.put(state, :players, [updated_player | remaining_players])
+
+    {:reply, :ok, new_state}
   end
 
   @impl true

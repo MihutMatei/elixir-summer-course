@@ -50,7 +50,11 @@ defmodule School.Logic do
     }
   end
 
-  def validate(package, rules_to_apply) do
+  def generate_ezic_package do
+    %Package{is_ezic: true}
+  end
+
+  def validate(package, rules_to_apply) when not package.is_ezic do
     [
       rule1: &validate_rule1/1,
       rule2: &validate_rule2/1,
@@ -70,6 +74,10 @@ defmodule School.Logic do
         {:invalid, msg} -> {:halt, {:invalid, msg}}
       end
     end)
+  end
+
+  def validate(package, _rules_to_apply) when package.is_ezic do
+    {:valid, "ezic"}
   end
 
   @type rule ::

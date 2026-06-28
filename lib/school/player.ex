@@ -10,7 +10,8 @@ defmodule School.Player do
             score: 0,
             pid: nil,
             ready?: false,
-            ezic_contract: true,
+            ezic_contract: false,
             ezic_score: 0,
-            custom_rules: []
+            custom_rules: [],
+            was_coerced: false
 end
