@@ -56,6 +56,10 @@ defmodule School.State do
     GenServer.call(__MODULE__, {:add_custom_rule, pid, rule})
   end
 
+  def spend_ezic_tokens(pid) do
+    GenServer.call(__MODULE__, {:spend_ezic_tokens, pid})
+  end
+
   @impl true
   def handle_call({:player_ready, name}, _from, state) do
     {[player], remaining_players} =
@@ -108,7 +112,7 @@ defmodule School.State do
       if swipe_direction == "swipe-right", do: player.ezic_score, else: player.ezic_score - 1
     else
       if player.was_coerced do
-        if swipe_direction == "swipe-right", do: player.ezic_score + 1, else: player.ezic_score - 2
+        if swipe_direction == "swipe-right", do: player.ezic_score + 1, else: player.ezic_score - 1
       else
         player.ezic_score
       end
@@ -134,6 +138,24 @@ defmodule School.State do
     new_state = Map.put(state, :players, updated_player_list)
 
     {:reply, {updated_player, decision, validation_msg}, new_state}
+  end
+
+  @impl true
+  def handle_call({:spend_ezic_tokens, pid}, _from, state) do
+    {[player], remaining_players} =
+      Enum.split_with(state.players, fn p -> p.pid == pid end)
+
+    updated_player = Map.update!(player, :ezic_score, fn s -> s - 5 end)
+    updated_player_list = [updated_player | remaining_players]
+    new_state = Map.put(state, :players, updated_player_list)
+
+    Phoenix.PubSub.broadcast(
+      School.PubSub,
+      "game_room",
+      {:update_player_list, sort_by_score(updated_player_list)}
+    )
+
+    {:reply, updated_player, new_state}
   end
 
   @impl true

@@ -70,13 +70,20 @@ defmodule SchoolWeb.MainLive do
 
   @impl true
   def handle_event("punish_player", %{"name" => name}, socket) do
-    player = Enum.find(socket.assigns.player_list, fn p -> p.name == name end)
+    local_player = socket.assigns.local_player
 
-    if player && player.pid do
-      send(player.pid, :punish)
+    if local_player && local_player.ezic_score >= 5 do
+      updated_player = State.spend_ezic_tokens(self())
+      target = Enum.find(socket.assigns.player_list, fn p -> p.name == name end)
+
+      if target && target.pid do
+        send(target.pid, :punish)
+      end
+
+      {:noreply, assign(socket, :local_player, updated_player)}
+    else
+      {:noreply, socket}
     end
-
-    {:noreply, socket}
   end
 
   @impl true
