@@ -157,7 +157,19 @@ defmodule SchoolWeb.MainLive do
   @impl true
   def handle_info(:punish, socket) do
     active_rules = socket.assigns.active_rules
-    available_rules = [:rule1, :rule2, :rule3, :rule4, :rule5, :rule6, :rule7, :rule8, :rule9, :rule10]
+
+    available_rules = [
+      :rule1,
+      :rule2,
+      :rule3,
+      :rule4,
+      :rule5,
+      :rule6,
+      :rule7,
+      :rule8,
+      :rule9,
+      :rule10
+    ]
 
     possible_new_rules = available_rules -- active_rules
 
@@ -195,7 +207,6 @@ defmodule SchoolWeb.MainLive do
 
     new_socket
   end
-
 
   def build_game_time_loading_bar(game_time) do
     max_game_time = State.max_game_time()

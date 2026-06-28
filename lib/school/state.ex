@@ -96,7 +96,6 @@ defmodule School.State do
     {validation_result, validation_msg} =
       Logic.validate(package, state.active_rules ++ player.custom_rules)
 
-
     decision =
       if validation_result == expected,
         do: :correct,
@@ -108,31 +107,49 @@ defmodule School.State do
         else: -1
 
     new_score = if !package.is_ezic, do: max(player.score + score_delta, 0), else: player.score
-    new_ezic_score = if package.is_ezic do
-      if swipe_direction == "swipe-right", do: player.ezic_score, else: player.ezic_score - 1
-    else
-      if player.was_coerced do
-        if swipe_direction == "swipe-right", do: player.ezic_score + 1, else: player.ezic_score - 1
-      else
-        player.ezic_score
-      end
-    end
-    based_ezic_score = if new_ezic_score <= -5 do
-      send(player.pid, :punish)
-      0
-    else
-      new_ezic_score
-    end
 
+    new_ezic_score =
+      if package.is_ezic do
+        if swipe_direction == "swipe-right", do: player.ezic_score, else: player.ezic_score - 1
+      else
+        if player.was_coerced do
+          if swipe_direction == "swipe-right",
+            do: player.ezic_score + 1,
+            else: player.ezic_score - 1
+        else
+          player.ezic_score
+        end
+      end
+
+    based_ezic_score =
+      if new_ezic_score <= -5 do
+        send(player.pid, :punish)
+        0
+      else
+        new_ezic_score
+      end
 
     coercion = package.is_ezic and swipe_direction == "swipe-right"
 
-    ezic_contract = if package.is_ezic and not player.ezic_contract, do: true, else: player.ezic_contract
+    ezic_contract =
+      if package.is_ezic and not player.ezic_contract, do: true, else: player.ezic_contract
 
-    updated_player = Map.put(player, :score, new_score)
-    updated_player = Map.put(updated_player, :ezic_score, based_ezic_score)
-    updated_player = Map.put(updated_player, :was_coerced, coercion)
-    updated_player = Map.put(updated_player, :ezic_contract, ezic_contract)
+    # updated_player = Map.put(player, :score, new_score)
+    # updated_player = Map.put(updated_player, :ezic_score, based_ezic_score)
+    # updated_player = Map.put(updated_player, :was_coerced, coercion)
+    # updated_player = Map.put(updated_player, :ezic_contract, ezic_contract)
+    # updated_player =
+    #   playuer
+    #   |> Map.put(:score, new_score)
+    #   |>
+
+    updated_player = %{
+      player
+      | score: new_score,
+        ezic_score: based_ezic_score,
+        was_coerced: coercion,
+        ezic_contract: ezic_contract
+    }
 
     updated_player_list = [updated_player | remaining_players]
 

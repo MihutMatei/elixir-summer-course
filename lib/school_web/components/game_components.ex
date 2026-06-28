@@ -22,6 +22,7 @@ defmodule SchoolWeb.GameComponents do
     </div>
     """
   end
+
   def score_banner2(assigns) do
     ~H"""
     <div class="player-score-bar">
@@ -279,9 +280,13 @@ defmodule SchoolWeb.GameComponents do
           </div>
           <div class="lb-player-score">{player.score}</div>
           <%= if @local_player && @local_player.name != player.name && @local_player.ezic_score >= 5 do %>
-          <button phx-click="punish_player" phx-value-name={player.name} style="width: 24px; height: 24px; border-radius: 4px; background-color: var(--paper-line); border: 1px solid var(--ink-muted); margin-left: 8px; cursor: pointer; transition: background-color 0.2s; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: var(--ink-soft);">
-            X
-          </button>
+            <button
+              phx-click="punish_player"
+              phx-value-name={player.name}
+              style="width: 24px; height: 24px; border-radius: 4px; background-color: var(--paper-line); border: 1px solid var(--ink-muted); margin-left: 8px; cursor: pointer; transition: background-color 0.2s; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: var(--ink-soft);"
+            >
+              X
+            </button>
           <% end %>
         </li>
       </ul>
@@ -292,11 +297,22 @@ defmodule SchoolWeb.GameComponents do
   def punish_overlay(assigns) do
     ~H"""
     <div class="match-end-overlay" style="display:flex">
-      <div class="match-end-card" style="background: var(--danger-bg); border: 2px solid var(--stamp-red);">
+      <div
+        class="match-end-card"
+        style="background: var(--danger-bg); border: 2px solid var(--stamp-red);"
+      >
         <div class="match-end-label" style="color: var(--stamp-red);">Alert</div>
         <div class="match-end-title" style="color: var(--stamp-red);">You Have Been Sabotaged!</div>
-        <p style="margin-bottom: 24px; color: var(--ink); font-size: 14px; font-weight: 500;">A new rule has been added to your regulations.</p>
-        <button phx-click="close_punish_popup" class="btn-new-match" style="background: var(--stamp-red);">Continue</button>
+        <p style="margin-bottom: 24px; color: var(--ink); font-size: 14px; font-weight: 500;">
+          A new rule has been added to your regulations.
+        </p>
+        <button
+          phx-click="close_punish_popup"
+          class="btn-new-match"
+          style="background: var(--stamp-red);"
+        >
+          Continue
+        </button>
       </div>
     </div>
     """
