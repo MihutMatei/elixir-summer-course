@@ -17,5 +17,6 @@ defmodule School.Package do
             declared_value: 100,
             has_customs_form: true,
             has_insurance: true,
-            has_fragile_sticker: true
+            has_fragile_sticker: true,
+            is_ezic: false
 end
