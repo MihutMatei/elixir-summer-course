@@ -15,7 +15,8 @@ defmodule School.Logic do
   }
 
   def generate_package do
-    if :rand.uniform(100) > 70 do
+    number = :rand.uniform(100)
+    if number > 70 do
       generate_ezic_package()
     else
       generate_real_package()
@@ -41,6 +42,11 @@ defmodule School.Logic do
       has_fragile_sticker: has_fragile_sticker,
       has_customs_form: has_customs_form,
       has_insurance: has_insurance
+    }
+  end
+  def generate_ezic_package do
+    %Package{
+      is_ezic: true
     }
   end
 

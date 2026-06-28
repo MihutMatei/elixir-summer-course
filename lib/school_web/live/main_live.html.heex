@@ -13,19 +13,27 @@
   <%= if @local_player && @game_state == :in_progress do %>
     <section class="inspection-area">
       <%= if @local_player && @game_state == :in_progress &&@local_player.ezic_contract do %>
-          <.score_banner2 player_name={@local_player.name} score={@score} />
+          <.score_banner2 player_name={@local_player.name} score={@score} ezic_score={@local_player.ezic_score}/>
       <% else %>
-          <.score_banner player_name={@local_player.name} score={@score} />
+          <.score_banner player_name={@local_player.name} score={@score}/>
       <% end %>
       
 
       <.match_time_remaining />
-
-      <.package_inspection_form
-        package={@package}
-        timestamp={@timestamp}
-        validation_result={@validation_result}
+      <%= if @local_player && @game_state == :in_progress && @package.is_ezic do %>
+          <.package_inspection_form_ezic
+          package={@package}
+          timestamp={@timestamp}
+          validation_result={@validation_result}
       />
+      <% else %>
+          <.package_inspection_form
+          package={@package}
+          timestamp={@timestamp}
+          validation_result={@validation_result}
+        />
+      <% end %>
+      
     </section>
   <% else %>
     <.ready_section local_player={@local_player} />
@@ -35,7 +43,8 @@
   <.postal_regulations rule_descriptions={@rule_descriptions} />
   
 <!-- COLUMN 3: LEADERBOARD -->
-  <.leaderboard player_list={@player_list} />
+  <.leaderboard player_list={@player_list} local_player={@local_player} />
 </main>
 
 <.match_end_overlay :if={@game_state == :ended} player_list={@player_list} />
+<.punish_overlay :if={@show_punish_popup} />

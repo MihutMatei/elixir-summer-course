@@ -34,7 +34,7 @@ defmodule SchoolWeb.GameComponents do
       </div>
       <div class="score-display">
         <span class="ezic-score-label">Ezic Score</span>
-        <span class="ezic-score-value">{@score}</span>
+        <span class="ezic-score-value">{@ezic_score}</span>
         <span class="ezic-score-unit">tokens</span>
       </div>
       <div class="score-display">
@@ -121,13 +121,13 @@ defmodule SchoolWeb.GameComponents do
         </div>
 
         <div class="package-checks">
-          <span :if={@package.has_customs_form} class="check-tag has">
+          <span class={"check-tag #{if @package.has_customs_form, do: "has", else: "missing"}"}>
             <span class="check-dot"></span> Customs Form
           </span>
-          <span :if={@package.has_insurance} class="check-tag has">
+          <span class={"check-tag #{if @package.has_insurance, do: "has", else: "missing"}"}>
             <span class="check-dot"></span> Insurance
           </span>
-          <span :if={@package.has_fragile_sticker} class="check-tag has">
+          <span class={"check-tag #{if @package.has_fragile_sticker, do: "has", else: "missing"}"}>
             <span class="check-dot"></span> Fragile Sticker
           </span>
         </div>
@@ -137,6 +137,57 @@ defmodule SchoolWeb.GameComponents do
             <span class="btn-icon">✕</span> Decline
           </button>
           <button phx-click="approve" class="btn btn-approve">
+            <span class="btn-icon">✓</span> Approve
+          </button>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  def package_inspection_form_ezic(assigns) do
+    ~H"""
+    <div class="card-reveal-wrapper">
+      <%= case @validation_result do %>
+        <% :correct -> %>
+          <div class="stamp-result" id={"card-#{@timestamp}"}>
+            <div class="stamp-mark approved">
+              <span class="stamp-label">Approved</span>
+              <span class="stamp-points">+1</span>
+            </div>
+          </div>
+        <% :incorrect -> %>
+          <div class="stamp-result" id={"card-#{@timestamp}"}>
+            <div class="stamp-mark rejected">
+              <span class="stamp-label">Rejected</span>
+              <span class="stamp-points">−1</span>
+            </div>
+          </div>
+        <% nil -> %>
+          <div></div>
+      <% end %>
+
+      <div class="package-card ezic-card">
+        <div class="card-header ezic-card-header">
+          <div class="card-title-group">
+            <div class="card-title ezic-card-title">Ezic Directive</div>
+            <div class="card-id ezic-card-id">PKG-{@timestamp}</div>
+          </div>
+          <div class="ezic-sigil">✦</div>
+        </div>
+
+        <div class="ezic-message">
+          <p>You have received a task from Ezic</p>
+          <p>We require the next package to be sent through regardless of validity</p>
+          <p>We trust you will make the correct decision.</p>
+          <p>Compliance is rewarded! Defiance is punished</p>
+        </div>
+
+        <div class="card-actions ezic-card-actions">
+          <button phx-click="decline" class="btn btn-ezic-decline">
+            <span class="btn-icon">✕</span> Decline
+          </button>
+          <button phx-click="approve" class="btn btn-ezic-approve">
             <span class="btn-icon">✓</span> Approve
           </button>
         </div>
@@ -211,6 +262,7 @@ defmodule SchoolWeb.GameComponents do
   end
 
   attr :player_list, :list, required: true
+  attr :local_player, :map, default: nil
 
   def leaderboard(assigns) do
     ~H"""
@@ -226,8 +278,26 @@ defmodule SchoolWeb.GameComponents do
             <div class="lb-player-name">{player.name}</div>
           </div>
           <div class="lb-player-score">{player.score}</div>
+          <%= if @local_player && @local_player.name != player.name do %>
+          <button phx-click="punish_player" phx-value-name={player.name} style="width: 24px; height: 24px; border-radius: 4px; background-color: var(--paper-line); border: 1px solid var(--ink-muted); margin-left: 8px; cursor: pointer; transition: background-color 0.2s; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: var(--ink-soft);">
+            X
+          </button>
+          <% end %>
         </li>
       </ul>
+    </div>
+    """
+  end
+
+  def punish_overlay(assigns) do
+    ~H"""
+    <div class="match-end-overlay" style="display:flex">
+      <div class="match-end-card" style="background: var(--danger-bg); border: 2px solid var(--stamp-red);">
+        <div class="match-end-label" style="color: var(--stamp-red);">Alert</div>
+        <div class="match-end-title" style="color: var(--stamp-red);">You Have Been Sabotaged!</div>
+        <p style="margin-bottom: 24px; color: var(--ink); font-size: 14px; font-weight: 500;">A new rule has been added to your regulations.</p>
+        <button phx-click="close_punish_popup" class="btn-new-match" style="background: var(--stamp-red);">Continue</button>
+      </div>
     </div>
     """
   end
