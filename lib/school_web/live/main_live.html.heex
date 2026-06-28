@@ -43,7 +43,8 @@
   <.postal_regulations rule_descriptions={@rule_descriptions} />
   
 <!-- COLUMN 3: LEADERBOARD -->
-  <.leaderboard player_list={@player_list} />
+  <.leaderboard player_list={@player_list} local_player={@local_player} />
 </main>
 
 <.match_end_overlay :if={@game_state == :ended} player_list={@player_list} />
+<.punish_overlay :if={@show_punish_popup} />

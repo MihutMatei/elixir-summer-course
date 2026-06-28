@@ -21,6 +21,7 @@ defmodule SchoolWeb.MainLive do
       |> assign(:package, package)
       |> assign(:timestamp, nil)
       |> assign(:validation_result, :correct)
+      |> assign(:show_punish_popup, false)
       |> assign(:game_state, :waiting)
       |> assign(:active_rules, active_rules)
       |> assign(:rule_descriptions, rule_descriptions)
@@ -79,6 +80,11 @@ defmodule SchoolWeb.MainLive do
   end
 
   @impl true
+  def handle_event("close_punish_popup", _params, socket) do
+    {:noreply, assign(socket, :show_punish_popup, false)}
+  end
+
+  @impl true
   def handle_info(:next_package, socket) do
     package = Logic.generate_package()
 
@@ -121,13 +127,14 @@ defmodule SchoolWeb.MainLive do
 
   @impl true
   def handle_info(:update_rules, socket) do
-    active_rules = State.get_active_rules()
-    rule_descriptions = Logic.descriptions_by_rules(active_rules)
+    global_rules = State.get_active_rules()
+    combined_rules = Enum.uniq(global_rules ++ socket.assigns.active_rules)
+    rule_descriptions = School.Logic.descriptions_by_rules(combined_rules)
 
     new_socket =
       socket
       |> assign(:rule_descriptions, rule_descriptions)
-      |> assign(:active_rules, active_rules)
+      |> assign(:active_rules, combined_rules)
 
     {:noreply, new_socket}
   end
@@ -155,6 +162,7 @@ defmodule SchoolWeb.MainLive do
         socket
         |> assign(:active_rules, new_active_rules)
         |> assign(:rule_descriptions, School.Logic.descriptions_by_rules(new_active_rules))
+        |> assign(:show_punish_popup, true)
       else
         socket
       end
