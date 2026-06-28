@@ -117,13 +117,20 @@ defmodule School.State do
         player.ezic_score
       end
     end
+    based_ezic_score = if new_ezic_score <= -5 do
+      send(player.pid, :punish)
+      0
+    else
+      new_ezic_score
+    end
+
 
     coercion = package.is_ezic and swipe_direction == "swipe-right"
 
     ezic_contract = if package.is_ezic and not player.ezic_contract, do: true, else: player.ezic_contract
 
     updated_player = Map.put(player, :score, new_score)
-    updated_player = Map.put(updated_player, :ezic_score, new_ezic_score)
+    updated_player = Map.put(updated_player, :ezic_score, based_ezic_score)
     updated_player = Map.put(updated_player, :was_coerced, coercion)
     updated_player = Map.put(updated_player, :ezic_contract, ezic_contract)
 
