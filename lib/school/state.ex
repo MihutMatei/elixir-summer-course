@@ -105,7 +105,7 @@ defmodule School.State do
 
     new_score = if !package.is_ezic, do: max(player.score + score_delta, 0), else: player.score
     new_ezic_score = if package.is_ezic do
-      if swipe_direction == "swipe-right", do: player.ezic_score + 1, else: player.ezic_score - 1
+      if swipe_direction == "swipe-right", do: player.ezic_score, else: player.ezic_score - 1
     else
       if player.was_coerced do
         if swipe_direction == "swipe-right", do: player.ezic_score + 1, else: player.ezic_score - 2
